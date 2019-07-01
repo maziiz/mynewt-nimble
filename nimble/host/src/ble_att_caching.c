@@ -90,7 +90,6 @@ ble_att_caching_svc_delete(struct ble_att_caching_svc *svc)
         SLIST_REMOVE_HEAD(&svc->chrs, next);
         ble_att_caching_chr_delete(chr);
     }
-
     os_memblock_put(&ble_att_caching_svc_pool, svc);
 }
 
@@ -104,7 +103,6 @@ ble_att_caching_conn_find_idx(uint16_t handle)
             return i;
         }
     }
-
     return -1;
 }
 
@@ -119,6 +117,20 @@ ble_att_caching_conn_find(uint16_t handle)
     } else {
         return ble_att_caching_conns + idx;
     }
+}
+
+static struct ble_att_caching_conn *
+ble_att_caching_conn_find_by_add(ble_addr_t *peer_addr)
+{
+    int i;
+    for (i = 0; i < ble_att_caching_num_conns; i++) {
+        if (!ble_addr_cmp((const ble_addr_t *)
+                &ble_att_caching_conns[i].peer_id_addr,
+                (const ble_addr_t *) peer_addr)) {
+            return ble_att_caching_conns + i;
+        }
+    }
+    return NULL;
 }
 
 static struct ble_att_caching_svc *
@@ -277,7 +289,10 @@ ble_att_caching_conn_add(struct ble_gap_conn_desc *desc)
     struct ble_att_caching_conn *conn;
     BLE_HS_DBG_ASSERT(
             ble_att_caching_num_conns < MYNEWT_VAL(BLE_MAX_CONNECTIONS));
-
+    conn = ble_att_caching_conn_find_by_add(&desc->peer_id_addr);
+    if (conn != NULL) {
+        return conn;
+    }
     conn = ble_att_caching_conns + ble_att_caching_num_conns;
     ble_att_caching_num_conns++;
 
@@ -405,6 +420,10 @@ ble_att_caching_check_if_services_cached(uint16_t conn_handle)
     struct ble_gap_conn_desc desc;
     struct ble_att_caching_conn *conn;
 
+    struct ble_att_caching_svc *svc;
+
+
+
     conn = ble_att_caching_conn_find(conn_handle);
     if (conn == NULL) {
         BLE_HS_LOG(DEBUG, "RECEIVED SERVICE FOR UNKNOWN CONNECTION; "
@@ -421,6 +440,19 @@ ble_att_caching_check_if_services_cached(uint16_t conn_handle)
                     (const ble_addr_t *) &desc.peer_id_addr)) {
         /* Then don`t discover. */
         return 0;
+
+    } else {
+
+        while ((svc = SLIST_FIRST(&conn->svcs)) != NULL) {
+
+            conn->all_services_cached = 0;
+
+            SLIST_REMOVE_HEAD(&conn->svcs, next);
+
+            ble_att_caching_svc_delete(svc);
+
+        }
+
     }
 
     return BLE_HS_EINVAL;
@@ -528,7 +560,6 @@ ble_att_caching_notify_application_with_cached_services(
     struct ble_att_caching_conn *conn;
     int status = 0;
     conn = ble_att_caching_conn_find(conn_handle);
-
     SLIST_FOREACH(svc, &conn->svcs, next)
     {
         cb(conn_handle, ble_gattc_error(status, 0), &svc->svc, cb_arg);
