@@ -28,9 +28,18 @@ extern "C" {
 
 struct ble_hs_cfg;
 
-#define BLE_SVC_GATT_CHR_SERVICE_CHANGED_UUID16     0x2a05
+#define BLE_SVC_GATT_CHR_SERVICE_CHANGED_UUID16     		  0x2a05
+#define BLE_SVC_GATT_CHR_CLIENT_SUPPORTED_FEATURES_UUID16     0x2b29
+#define BLE_SVC_GATT_CHR_DATABASE_HASH_UUID16     			  0x2b2a
+/* TODO: Update EATT_SUPPORTED_UUID16 based on SIG Assigned Numbers */
+#define BLE_SVC_GATT_CHR_EATT_SUPPORTED_UUID16     			  0x2b2c
 
-void ble_svc_gatt_changed(uint16_t start_handle, uint16_t end_handle);
+void
+ble_svc_gatt_changed(uint16_t start_handle, uint16_t end_handle);
+bool
+ble_svc_gatt_is_client_support_robust_caching(void);
+int
+ble_svc_gatt_update_database_hash(void);
 void ble_svc_gatt_init(void);
 
 #ifdef __cplusplus
