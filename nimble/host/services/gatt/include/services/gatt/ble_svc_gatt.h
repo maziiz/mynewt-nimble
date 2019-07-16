@@ -37,7 +37,7 @@ struct ble_hs_cfg;
 void
 ble_svc_gatt_changed(uint16_t start_handle, uint16_t end_handle);
 bool
-ble_svc_gatt_is_client_support_robust_caching(void);
+ble_svc_gatt_is_client_robust_caching_supported(void);
 int
 ble_svc_gatt_update_database_hash(void);
 void ble_svc_gatt_init(void);

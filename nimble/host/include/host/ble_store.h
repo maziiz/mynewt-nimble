@@ -88,7 +88,7 @@ struct ble_store_value_sec {
 
     unsigned authenticated:1;
     uint8_t sc:1;
-    uint8_t aware;
+    uint8_t aware:1;
 };
 
 /**

@@ -38,7 +38,6 @@ static uint16_t ble_svc_gatt_end_handle;
 
 static uint8_t ble_svc_gatt_client_supported_features_val
                         [CLIENT_SUPPORTED_FEATURES_MAX_OCTETS];
-static uint8_t* ble_svc_gatt_database_hash_val;
 
 static int
 ble_svc_gatt_access(uint16_t conn_handle, uint16_t attr_handle,
@@ -74,12 +73,13 @@ static const struct ble_gatt_svc_def ble_svc_gatt_defs[] = {
 };
 
 static int
-ble_svc_gatt_service_changed_read_access(struct ble_gatt_access_ctxt *ctxt) {
+ble_svc_gatt_service_changed_read_access(struct ble_gatt_access_ctxt *ctxt)
+{
     uint8_t *u8p;
 
     u8p = os_mbuf_extend(ctxt->om, 4);
     if (u8p == NULL) {
-        return BLE_ATT_ERR_INSUFFICIENT_RES;
+        return BLE_HS_ENOMEM;
     }
 
     put_le16(u8p + 0, ble_svc_gatt_start_handle);
@@ -89,7 +89,8 @@ ble_svc_gatt_service_changed_read_access(struct ble_gatt_access_ctxt *ctxt) {
 
 static int
 ble_svc_gatt_client_supported_features_read_access(
-                struct ble_gatt_access_ctxt *ctxt) {
+                struct ble_gatt_access_ctxt *ctxt)
+{
     int rc;
 
     rc = os_mbuf_append(ctxt->om, ble_svc_gatt_client_supported_features_val,
@@ -100,7 +101,8 @@ ble_svc_gatt_client_supported_features_read_access(
 
 static int
 ble_svc_gatt_client_supported_features_write_access(
-                        struct ble_gatt_access_ctxt *ctxt) {
+                        struct ble_gatt_access_ctxt *ctxt)
+{
     uint16_t om_len;
     int rc;
 
@@ -119,8 +121,10 @@ ble_svc_gatt_client_supported_features_write_access(
 }
 
 static int
-ble_svc_gatt_database_hash_read_access(struct ble_gatt_access_ctxt *ctxt) {
+ble_svc_gatt_database_hash_read_access(struct ble_gatt_access_ctxt *ctxt)
+{
     int rc;
+    uint8_t* ble_svc_gatt_database_hash_val;
     ble_svc_gatt_database_hash_val = ble_att_svr_get_database_hash();
     rc = os_mbuf_append(ctxt->om, ble_svc_gatt_database_hash_val,
             BLE_ATT_SVR_HASH_KEY_SIZE_IN_BYTES);
@@ -183,13 +187,15 @@ ble_svc_gatt_changed(uint16_t start_handle, uint16_t end_handle)
 
 
 bool
-ble_svc_gatt_is_client_support_robust_caching(void) {
+ble_svc_gatt_is_client_robust_caching_supported(void)
+{
    bool rc = ((ble_svc_gatt_client_supported_features_val[0] & (1 << ROBUST_CACHING)) == 1);
    return rc;
 }
 
 int
-ble_svc_gatt_update_database_hash(void) {
+ble_svc_gatt_update_database_hash(void)
+{
     int rc ;
     rc = ble_att_svr_calculate_database_hash();
     return rc;

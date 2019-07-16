@@ -468,7 +468,8 @@ ble_att_rx_handle_unknown_request(uint8_t op, uint16_t conn_handle,
 }
 
 static int
-ble_att_check_hash_uuid(uint16_t conn_handle, struct os_mbuf **rxom) {
+ble_att_check_hash_uuid(struct os_mbuf **rxom)
+{
     struct ble_att_read_req *req;
     uint16_t err_handle;
     struct ble_att_svr_entry *entry;
@@ -524,7 +525,7 @@ ble_att_rx(struct ble_l2cap_chan *chan)
          * but in case of reading hash uuid server shall respond.*/
 
         if(entry->bde_op != BLE_ATT_OP_READ_REQ ||
-                ble_att_check_hash_uuid(conn_handle,om)) {
+                ble_att_check_hash_uuid(om)) {
             ble_hs_conn_check_set_awareness_if_bonding(conn_handle, 1);
             os_mbuf_adj(*om, OS_MBUF_PKTLEN(*om));
             ble_att_svr_tx_error_rsp(conn_handle, *om, op, 0,

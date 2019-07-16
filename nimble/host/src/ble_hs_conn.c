@@ -522,7 +522,8 @@ ble_hs_conn_timer(void)
 
 void
 ble_hs_conn_check_set_awareness_if_bonding(uint16_t conn_handle,
-        uint8_t aware) {
+        uint8_t aware)
+{
     struct ble_store_value_sec value_sec;
     struct ble_store_key_sec key_sec;
     struct ble_hs_conn_addrs addrs;
@@ -551,7 +552,8 @@ ble_hs_conn_check_set_awareness_if_bonding(uint16_t conn_handle,
 }
 
 void
-ble_hs_conn_set_awareness(uint16_t conn_handle, uint8_t aware) {
+ble_hs_conn_set_awareness(uint16_t conn_handle, uint8_t aware)
+{
     struct ble_hs_conn *conn;
     ble_hs_lock();
     conn = ble_hs_conn_find(conn_handle);
@@ -562,13 +564,14 @@ ble_hs_conn_set_awareness(uint16_t conn_handle, uint8_t aware) {
         ble_hs_unlock();
         return ;
     }
-    ble_hs_unlock();
    conn->aware = aware;
+    ble_hs_unlock();
 
 }
 
 void
-ble_hs_conn_set_all_awareness(uint8_t aware) {
+ble_hs_conn_set_all_awareness(uint8_t aware)
+{
     struct ble_hs_conn *conn;
     struct ble_store_value_sec value_sec;
     SLIST_FOREACH(conn, &ble_hs_conns, bhc_next) {
@@ -580,7 +583,8 @@ ble_hs_conn_set_all_awareness(uint8_t aware) {
 }
 
 uint8_t
-ble_hs_conn_get_awareness(uint16_t conn_handle) {
+ble_hs_conn_get_awareness(uint16_t conn_handle)
+{
     struct ble_hs_conn *conn;
     ble_hs_lock();
     conn = ble_hs_conn_find(conn_handle);
